@@ -24,8 +24,8 @@ buildtest: &buildtest
   name: Building package
   command: |
     cd ~/aur/${CIRCLE_JOB}
-    sudo yaourt -S $(source PKGBUILD && printf '%s' "${depends[@]}") --noconfirm
-    sudo yaourt -S $(source PKGBUILD && printf '%s' "${makedepends[@]}") --noconfirm
+    sudo yaourt -S $(source PKGBUILD && printf '%s ' "${depends[@]}") --noconfirm
+    sudo yaourt -S $(source PKGBUILD && printf '%s ' "${makedepends[@]}") --noconfirm
     makepkg -c --noconfirm
 
 # Main
