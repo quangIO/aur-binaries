@@ -25,7 +25,7 @@ buildtest: &buildtest
   name: Building package
   command: |
     cd ~/aur/${CIRCLE_JOB}
-    sudo pacman -S python-setuptools
+    sudo pacman -S python-setuptools --noconfirm
     yaourt --m-arg --skipchecksums --m-arg --skippgpcheck -S --needed $(source PKGBUILD && printf '%s ' "${depends[@]}") --noconfirm
     yaourt --m-arg --skipchecksums --m-arg --skippgpcheck -S --needed $(source PKGBUILD && printf '%s ' "${makedepends[@]}") --noconfirm
     makepkg --noconfirm
