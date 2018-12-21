@@ -25,6 +25,7 @@ buildtest: &buildtest
   name: Building package
   command: |
     cd ~/aur/${CIRCLE_JOB}
+    sudo pacman -S python-setuptools
     yaourt --m-arg --skipchecksums --m-arg --skippgpcheck -S --needed $(source PKGBUILD && printf '%s ' "${depends[@]}") --noconfirm
     yaourt --m-arg --skipchecksums --m-arg --skippgpcheck -S --needed $(source PKGBUILD && printf '%s ' "${makedepends[@]}") --noconfirm
     makepkg --noconfirm
@@ -61,9 +62,9 @@ jobs:
       - run:
           <<: *buildtest
       - persist_to_workspace:
-        root: /tmp/artifacts
-        paths:
-          - wavm*gz
+          root: /tmp/artifacts
+          paths:
+            - wavm*gz
   deploy:
     <<: *defaults
     steps:
@@ -85,4 +86,7 @@ workflows:
     jobs:
       - seastar-git
       - wavm-git
-      - deploy
+      - deploy:
+          requires:
+            - seastar-git
+            - wavm-git
