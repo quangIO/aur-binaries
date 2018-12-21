@@ -4,6 +4,13 @@ defaults: &defaults
   docker:
     - image: imrehg/archlinux-makepkg
 
+persist: &persist
+  persist_to_workspace:
+    root: /tmp/artifacts
+    paths:
+      - *.tar.gz
+
+
 updatepackage: &updatepackage
   name: Update packages
   command: sudo pacman -Syu --noconfirm
@@ -24,9 +31,9 @@ buildtest: &buildtest
   name: Building package
   command: |
     cd ~/aur/${CIRCLE_JOB}
-    yaourt -S --needed $(source PKGBUILD && printf '%s ' "${depends[@]}") --noconfirm
-    yaourt -S --needed $(source PKGBUILD && printf '%s ' "${makedepends[@]}") --noconfirm
-    makepkg -c --noconfirm
+    yaourt --m-arg --skipchecksums --m-arg --skippgpcheck -S --needed $(source PKGBUILD && printf '%s ' "${depends[@]}") --noconfirm
+    yaourt --m-arg --skipchecksums --m-arg --skippgpcheck -S --needed $(source PKGBUILD && printf '%s ' "${makedepends[@]}") --noconfirm
+    makepkg --noconfirm
 
 # Main
 version: 2
@@ -43,6 +50,10 @@ jobs:
           <<: *pkgbuildtest
       - run:
           <<: *buildtest
+      - persist_to_workspace:
+          root: /tmp/artifacts
+          paths:
+            - *.tar.gz
   wavm-git:
     <<: *defaults
     steps:
@@ -55,6 +66,23 @@ jobs:
           <<: *pkgbuildtest
       - run:
           <<: *buildtest
+      - persist_to_workspace:
+        root: /tmp/artifacts
+        paths:
+          - *.tar.gz
+  deploy:
+    steps:
+      - attach_workspace:
+          at: /tmp/artifacts
+      - run:
+          name: "Publish Release on GitHub"
+          command: |
+            go get github.com/tcnksm/ghr
+            VERSION=$(my-binary --version)
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_BUILD_NUM} /tmp/artifacts/
+      - store_artifacts:
+          path: /tmp/artifacts
+
 
 workflows:
   version: 2
@@ -62,3 +90,4 @@ workflows:
     jobs:
       - seastar-git
       - wavm-git
+      - deploys
