@@ -1,0 +1,6 @@
+[submodule "seastar-git"]
+	path = seastar-git
+	url = ssh://aur@aur.archlinux.org/seastar-git.git
+[submodule "wavm-git"]
+	path = wavm-git
+	url = ssh://aur@aur.archlinux.org/wavm-git.git

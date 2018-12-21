@@ -1,0 +1,62 @@
+# Common sections
+defaults: &defaults
+  working_directory: ~/aur
+  docker:
+    - image: imrehg/archlinux-makepkg
+
+updatepackage: &updatepackage
+  name: Update packages
+  command: sudo pacman -Syu --noconfirm
+
+gitupdate: &gitupdate
+  name: Git repo updates
+  command: |
+    sed -i "s#ssh://aur@aur.archlinux.org#https://aur.archlinux.org#" .gitmodules
+    git submodule update --init
+
+pkgbuildtest: &pkgbuildtest
+  name: Testing PKGBUILD
+  command: |
+    cd ~/aur/${CIRCLE_JOB}
+    namcap PKGBUILD
+
+buildtest: &buildtest
+  name: Building package
+  command: |
+    cd ~/aur/${CIRCLE_JOB}
+    makepkg -sci --noconfirm
+
+# Main
+version: 2
+jobs:
+  seastar-git:
+    <<: *defaults
+    steps:
+      - run:
+          <<: *updatepackage
+      - checkout
+      - run:
+          <<: *gitupdate
+      - run:
+          <<: *pkgbuildtest
+      - run:
+          <<: *buildtest
+  wavm-git:
+    <<: *defaults
+    steps:
+      - run:
+          <<: *updatepackage
+      - checkout
+      - run:
+          <<: *gitupdate
+      - run:
+          <<: *pkgbuildtest
+      - run:
+          <<: *buildtest
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - seastar-git
+      - wavm-git
