@@ -4,12 +4,6 @@ defaults: &defaults
   docker:
     - image: imrehg/archlinux-makepkg
 
-persist: &persist
-  persist_to_workspace:
-    root: /tmp/artifacts
-    paths:
-      - *.tar.gz
-
 
 updatepackage: &updatepackage
   name: Update packages
@@ -53,7 +47,7 @@ jobs:
       - persist_to_workspace:
           root: /tmp/artifacts
           paths:
-            - *.tar.gz
+            - seastar*gz
   wavm-git:
     <<: *defaults
     steps:
@@ -69,7 +63,7 @@ jobs:
       - persist_to_workspace:
         root: /tmp/artifacts
         paths:
-          - *.tar.gz
+          - wavm*gz
   deploy:
     steps:
       - attach_workspace:
