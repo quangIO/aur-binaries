@@ -65,6 +65,7 @@ jobs:
         paths:
           - wavm*gz
   deploy:
+    <<: *defaults
     steps:
       - attach_workspace:
           at: /tmp/artifacts
@@ -84,4 +85,4 @@ workflows:
     jobs:
       - seastar-git
       - wavm-git
-      - deploys
+      - deploy
